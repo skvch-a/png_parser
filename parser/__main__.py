@@ -9,7 +9,7 @@ def parse_file(file_path):
         with open(file_path, 'rb') as file:
             signature = file.read(8)
             if signature != b'\x89PNG\r\n\x1a\n':
-                raise ValueError("это не PNG файл")
+                raise ValueError("Это не PNG файл")
 
             while True:
                 header = parse_header(file)
@@ -36,9 +36,9 @@ def parse_header(file):
 
 
 def print_headers(headers):
-    print('-' * 50)
+    print('-' * 100)
     print(f"{'Chunk Type':<12} {'Length':<8} {'CRC':<12} {'Data Size':<12}")
-    print("-" * 50)
+    print("-" * 100)
     for header in headers:
         print(f"{header['Chunk Type']:<12} {header['Length']:<8} {header['CRC']:<12} {header['Data Size']:<12}")
 
@@ -67,14 +67,17 @@ def decode_plte(data):
 
 
 def main():
+    print('=' * 100)
+    print('PNG Parser')
+    print('=' * 100)
     file_path = input("Введите путь к файлу: ").strip()
-    print('-' * 50)
+    print('-' * 100)
     file_name = os.path.basename(file_path)
     file_size = os.path.getsize(file_path)
 
     print(f"Имя файла: {file_name}")
     print(f"Размер файла: {file_size} байт")
-    print('-' * 50)
+    print('-' * 100)
     headers = parse_file(file_path)
     if headers:
         for header in headers:
