@@ -1,6 +1,11 @@
 import struct
-from PIL import Image
 import os
+
+try:
+    from PIL import Image
+    CAN_VISUALIZE = True
+except ImportError:
+    CAN_VISUALIZE = False
 
 
 def parse_file(file_path):
@@ -43,7 +48,7 @@ def print_headers(headers):
         print(f"{header['Chunk Type']:<12} {header['Length']:<8} {header['CRC']:<12} {header['Data Size']:<12}")
 
 
-def decode_ihdr(data):
+def print_decoded_ihdr(data):
     width, height = struct.unpack('>II', data[:8])
     bit_depth = data[8]
     color_type = data[9]
@@ -62,7 +67,7 @@ def decode_ihdr(data):
     print(f"Тип цвета: {color_types.get(color_type, 'Неизвестный тип')}")
 
 
-def decode_plte(data):
+def print_decoded_plte(data):
     print(f"Размер палитры: {len(data) // 3} цветов")
 
 
@@ -70,26 +75,34 @@ def main():
     print('=' * 100)
     print('PNG Parser')
     print('=' * 100)
+
     file_path = input("Введите путь к файлу: ").strip()
     print('-' * 100)
-    file_name = os.path.basename(file_path)
-    file_size = os.path.getsize(file_path)
+
+    try:
+        file_name = os.path.basename(file_path)
+        file_size = os.path.getsize(file_path)
+    except FileNotFoundError:
+        print('Файл не найден')
+        exit()
 
     print(f"Имя файла: {file_name}")
     print(f"Размер файла: {file_size} байт")
     print('-' * 100)
+
     headers = parse_file(file_path)
     if headers:
         for header in headers:
             chunk_type = header['Chunk Type']
             data = header['Data']
             if chunk_type == 'IHDR':
-                decode_ihdr(data)
+                print_decoded_ihdr(data)
             elif chunk_type == 'PLTE':
-                decode_plte(data)
+                print_decoded_plte(data)
 
         print_headers(headers)
-        Image.open(file_path).show()
+        if CAN_VISUALIZE:
+            Image.open(file_path).show()
 
 
 if __name__ == '__main__':
