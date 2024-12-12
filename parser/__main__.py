@@ -12,19 +12,14 @@ def read_png_headers(file_path):
                 raise ValueError("Это не PNG файл.")
 
             while True:
-                # Длина данных
                 length_data = file.read(4)
                 if len(length_data) < 4:
                     break
                 length = struct.unpack('>I', length_data)[0]
 
-                # Тип заголовка
                 chunk_type = file.read(4).decode('ascii')
-
-                # Данные заголовка
                 data = file.read(length)
 
-                # CRC заголовка
                 crc_data = file.read(4)
                 crc = struct.unpack('>I', crc_data)[0]
 
@@ -52,7 +47,6 @@ def print_headers(headers):
 
 
 def decode_IHDR(data):
-    # IHDR заголовок содержит информацию о изображении
     width, height = struct.unpack('>II', data[:8])
     bit_depth = data[8]
     color_type = data[9]
@@ -65,7 +59,6 @@ def decode_IHDR(data):
         6: "RGBA"
     }
 
-    print("\nИнформация о заголовке IHDR:")
     print(f"Ширина: {width} пикселей")
     print(f"Высота: {height} пикселей")
     print(f"Глубина цвета: {bit_depth}")
