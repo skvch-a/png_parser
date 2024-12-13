@@ -16,7 +16,7 @@ def print_headers(headers):
         print(f"{header['Chunk Type']:<12} {header['Length']:<8} {header['CRC']:<12} {header['Data Size']:<12}")
 
 
-def print_decoded_ihdr(width, height, bit_depth, color_type):
+def print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, interlace_method):
     color_types = {
         0: "Grayscale",
         2: "RGB",
@@ -28,7 +28,9 @@ def print_decoded_ihdr(width, height, bit_depth, color_type):
     print(f"Ширина: {width} пикселей")
     print(f"Высота: {height} пикселей")
     print(f"Глубина цвета: {bit_depth}")
-    print(f"Тип цвета: {color_types.get(color_type, 'Неизвестный тип')}")
+    print(f"Тип цвета: {color_types.get(color_type, 'Неизвестный')}")
+    print(f"Метод сжатия: {compression_method}")
+    print(f"Метод интерлейса: {interlace_method}")
 
 
 def print_decoded_plte(plte_chunk_data):

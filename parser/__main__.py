@@ -42,7 +42,9 @@ def decode_ihdr(ihdr_chunk_data):
     width, height = struct.unpack('>II', ihdr_chunk_data[:8])
     bit_depth = ihdr_chunk_data[8]
     color_type = ihdr_chunk_data[9]
-    return width, height, bit_depth, color_type
+    compression_method = 'DEFLATE' if ihdr_chunk_data[10] == 0 else 'Неизвестный'
+    interlace_method = 'Adam7' if ihdr_chunk_data[12] == 1 else 'Отсутствует'
+    return width, height, bit_depth, color_type, compression_method, interlace_method
 
 
 def main():
@@ -66,8 +68,9 @@ def main():
     if headers:
         ihdr_chunk = next((h for h in headers if h['Chunk Type'] == 'IHDR'))
         plte_chunk = next((h for h in headers if h['Chunk Type'] == 'PLTE'), None)
-        width, height, bit_depth, color_type = decode_ihdr(ihdr_chunk['Data'])
-        print_decoded_ihdr(width, height, bit_depth, color_type)
+        ihdr = ihdr_chunk['Data']
+        width, height, bit_depth, color_type, compression_method, interlace_method = decode_ihdr(ihdr)
+        print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, interlace_method)
         if plte_chunk:
             print_decoded_plte(plte_chunk)
 
