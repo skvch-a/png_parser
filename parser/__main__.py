@@ -73,7 +73,7 @@ def main():
         width, height, bit_depth, color_type, compression_method, interlace_method = decode_ihdr(ihdr)
         print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, interlace_method)
         if plte_chunk:
-            print_decoded_plte(plte_chunk)
+            print_decoded_plte(plte_chunk['Data'])
 
         print_headers(headers)
         if CAN_VISUALIZE:

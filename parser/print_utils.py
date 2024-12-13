@@ -35,3 +35,15 @@ def print_decoded_ihdr(width, height, bit_depth, color_type, compression_method,
 
 def print_decoded_plte(plte_chunk_data):
     print(f"Размер палитры: {len(plte_chunk_data) // 3} цветов")
+    colors = []
+    for i in range(0, len(plte_chunk_data), 3):
+        r, g, b = plte_chunk_data[i:i + 3]
+        colors.append(f"({r}, {g}, {b})")
+
+    print_line()
+    print("Цвета в палитре:")
+    print_line()
+    k = 1
+    for color in colors:
+        print(f'{k}. {color}')
+        k += 1
