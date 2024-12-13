@@ -5,8 +5,11 @@ from . import CAN_VISUALIZE
 from .visualizer import visualize
 from .print_utils import print_title, print_line, print_headers, print_decoded_plte, print_decoded_ihdr
 
+from typing import List, Dict, BinaryIO, Tuple
 
-def parse_file(file_path):
+
+def parse_file(file_path: str) -> List[Dict[str, any]]:
+    """Извлекает все заголовки из PNG файла"""
     headers = []
     try:
         with open(file_path, 'rb') as file:
@@ -24,7 +27,8 @@ def parse_file(file_path):
     return headers
 
 
-def parse_header(file):
+def parse_header(file: BinaryIO) -> Dict[str, any]:
+    """Извлекает один заголовок из PNG файла"""
     length = struct.unpack('>I', file.read(4))[0]
     chunk_type = file.read(4).decode('ascii')
     data = file.read(length)
@@ -38,7 +42,8 @@ def parse_header(file):
     }
 
 
-def decode_ihdr(ihdr_chunk_data):
+def decode_ihdr(ihdr_chunk_data: bytes) -> Tuple[int, int, int, int, str, str]:
+    """Извлекает данные из заголовка IHDR"""
     width, height = struct.unpack('>II', ihdr_chunk_data[:8])
     bit_depth = ihdr_chunk_data[8]
     color_type = ihdr_chunk_data[9]
@@ -53,12 +58,8 @@ def main():
     file_path = input("Введите путь к файлу: ").strip()
     print_line()
 
-    try:
-        file_name = os.path.basename(file_path)
-        file_size = os.path.getsize(file_path)
-    except FileNotFoundError:
-        print('Файл не найден')
-        exit()
+    file_name = os.path.basename(file_path)
+    file_size = os.path.getsize(file_path)
 
     print(f"Имя файла: {file_name}")
     print(f"Размер файла: {file_size} байт")

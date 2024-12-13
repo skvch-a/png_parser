@@ -1,9 +1,21 @@
+from typing import List, Dict
+
 from . import Image
 from zlib import decompress
 
 
-def paeth_predictor(a, b, c):
-    """Paeth filter predictor."""
+def paeth_predictor(a: int, b: int, c: int) -> int:
+    """
+        Алгоритм для фильтрации данных в PNG (фильтр 4 типа)
+
+        Args:
+            a (int): Значение пикселя слева.
+            b (int): Значение пикселя сверху.
+            c (int): Значение пикселя сверху слева.
+
+        Returns:
+            int: Рекомендуемое значение пикселя на основе предсказания Паэта.
+        """
     p = a + b - c
     pa = abs(p - a)
     pb = abs(p - b)
@@ -16,8 +28,8 @@ def paeth_predictor(a, b, c):
         return c
 
 
-def apply_filtering(data, width, height, bytes_per_pixel):
-    """Обрабатывает фильтры PNG."""
+def apply_filtering(data: bytes, width: int, height: int, bytes_per_pixel: int) -> bytes:
+    """Применяет фильтрацию к данным изображения"""
     stride = width * bytes_per_pixel
     result = []
     prev_row = bytearray(stride)
@@ -53,7 +65,8 @@ def apply_filtering(data, width, height, bytes_per_pixel):
     return bytes(result)
 
 
-def visualize(headers, width, height, color_type):
+def visualize(headers: List[Dict[str, any]], width: int, height: int, color_type: int) -> None:
+    """Отвечает за попиксельную отрисовку изображения"""
     color_modes = {
         0: ("L", 1),  # Grayscale
         2: ("RGB", 3),  # RGB
@@ -70,7 +83,7 @@ def visualize(headers, width, height, color_type):
 
     image = Image.frombytes(mode, (width, height), filtered_data)
     if color_type == 3:
-        plte_chunk = next((h for h in headers if h['Chunk Type'] == 'PLTE'), None)
+        plte_chunk = next((h for h in headers if h['Chunk Type'] == 'PLTE'))
         palette = plte_chunk['Data']
         image.putpalette(palette)
     image.show()
