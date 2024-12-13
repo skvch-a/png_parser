@@ -60,12 +60,12 @@ def main():
 
     print(f"Имя файла: {file_name}")
     print(f"Размер файла: {file_size} байт")
-    print('-' * 100)
+    print_line()
 
     headers = parse_file(file_path)
     if headers:
         ihdr_chunk = next((h for h in headers if h['Chunk Type'] == 'IHDR'))
-        plte_chunk = next((h for h in headers if h['Chunk Type'] == 'IHDR'), None)
+        plte_chunk = next((h for h in headers if h['Chunk Type'] == 'PLTE'), None)
         width, height, bit_depth, color_type = decode_ihdr(ihdr_chunk['Data'])
         print_decoded_ihdr(width, height, bit_depth, color_type)
         if plte_chunk:
