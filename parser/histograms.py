@@ -12,13 +12,11 @@ def calculate_histograms(image_data: bytes, width: int, height: int, color_type:
     green_hist = np.zeros(256, dtype=np.int32)
     blue_hist = np.zeros(256, dtype=np.int32)
 
-    if bytes_per_pixel >= 3:
+    if color_type in (2, 6):
         red_hist = np.bincount(image_array[:, :, 0].flatten(), minlength=256)
         green_hist = np.bincount(image_array[:, :, 1].flatten(), minlength=256)
         blue_hist = np.bincount(image_array[:, :, 2].flatten(), minlength=256)
-
-    if bytes_per_pixel >= 3:
-        total_hist = red_hist + green_hist + blue_hist
+        total_hist = (red_hist + green_hist + blue_hist) / 3
     else:
         total_hist = np.bincount(image_array.flatten(), minlength=256)
 
