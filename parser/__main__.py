@@ -6,6 +6,7 @@ from .visualizer import visualize
 from .print_utils import print_title, print_line, print_headers, print_decoded_plte, print_decoded_ihdr
 
 from typing import List, Dict, BinaryIO, Tuple
+from sys import argv
 
 
 def parse_file(file_path: str) -> List[Dict[str, any]]:
@@ -55,8 +56,12 @@ def decode_ihdr(ihdr_chunk_data: bytes) -> Tuple[int, int, int, int, str, str]:
 def main():
     print_title()
 
-    file_path = input("Введите путь к файлу: ").strip()
-    print_line()
+    if len(argv) > 1:
+        file_path = argv[1]
+    else:
+        file_path = input("Введите путь к файлу: ").strip()
+        print_line()
+
 
     file_name = os.path.basename(file_path)
     file_size = os.path.getsize(file_path)
