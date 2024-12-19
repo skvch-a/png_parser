@@ -1,6 +1,7 @@
 # PNG Parser
 
-### Запуск: `python3 -m parser`
+### Запуск: 
+`python -m parser` или `python -m parser path/to/image.png`
 
 ### Требования:
 - Python (рекомендуется версия не ниже 3.10)
