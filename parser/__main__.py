@@ -4,8 +4,11 @@ import os
 from . import CAN_VISUALIZE
 from .visualizer import visualize
 from .print_utils import print_title, print_line, print_headers, print_decoded_plte, print_decoded_ihdr
+from .filtering import apply_filtering
+from .histograms import create_histograms
 
 from typing import List, Dict, BinaryIO, Tuple
+from zlib import decompress
 from sys import argv
 
 
@@ -81,8 +84,14 @@ def main():
             print_decoded_plte(plte_chunk['Data'])
 
         print_headers(headers)
+        idat_data = b''.join(h['Data'] for h in headers if h['Chunk Type'] == 'IDAT')
+        decompressed_idat_data = decompress(idat_data)
+        image_data = apply_filtering(decompressed_idat_data, width, height, color_type)
+
         if CAN_VISUALIZE:
-            visualize(headers, width, height, color_type)
+            visualize(image_data, width, height, color_type, plte_chunk['Data'])
+
+        create_histograms(image_data, width, height, color_type)
 
 
 if __name__ == '__main__':
