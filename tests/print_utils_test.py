@@ -4,7 +4,7 @@ from parser.print_utils import (
     print_title,
     print_headers,
     print_decoded_ihdr,
-    print_decoded_plte,
+    print_palette,
 )
 
 def test_print_line():
@@ -68,6 +68,6 @@ def test_print_decoded_plte():
         ('3. (0, 0, 255)',),
     ]
     with patch('builtins.print') as mock_print:
-        print_decoded_plte(plte_chunk_data)
+        print_palette(plte_chunk_data)
         actual_calls = [call.args for call in mock_print.call_args_list]
         assert actual_calls == expected_calls

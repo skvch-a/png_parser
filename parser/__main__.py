@@ -3,7 +3,7 @@ import os
 
 from . import CAN_VISUALIZE
 from .visualizer import visualize
-from .print_utils import print_title, print_line, print_headers, print_decoded_plte, print_decoded_ihdr
+from .print_utils import print_title, print_line, print_headers, print_palette, print_decoded_ihdr
 from .filtering import apply_filtering
 from .histograms import create_histograms
 
@@ -80,8 +80,12 @@ def main():
         ihdr = ihdr_chunk['Data']
         width, height, bit_depth, color_type, compression_method, interlace_method = decode_ihdr(ihdr)
         print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, interlace_method)
+
+        palette = None
         if plte_chunk:
-            print_decoded_plte(plte_chunk['Data'])
+            palette = plte_chunk['Data']
+            print_palette(palette)
+
 
         print_headers(headers)
         idat_data = b''.join(h['Data'] for h in headers if h['Chunk Type'] == 'IDAT')
@@ -89,7 +93,7 @@ def main():
         image_data = apply_filtering(decompressed_idat_data, width, height, color_type)
 
         if CAN_VISUALIZE:
-            visualize(image_data, width, height, color_type, plte_chunk['Data'])
+            visualize(image_data, width, height, color_type, palette)
 
         create_histograms(image_data, width, height, color_type)
 

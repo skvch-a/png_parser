@@ -2,7 +2,8 @@ import os
 
 import pytest
 from parser.__main__ import parse_file, decode_ihdr
-from parser.visualizer import visualize, paeth_predictor, apply_filtering
+from parser.visualizer import visualize
+from parser.filtering import apply_filtering, paeth_predictor
 from unittest.mock import patch
 
 
