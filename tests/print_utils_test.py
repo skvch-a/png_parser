@@ -42,17 +42,18 @@ def test_print_headers():
 
 def test_print_decoded_ihdr():
     width, height, bit_depth = 512, 256, 8
-    color_type, compression_method, interlace_method = 6, 0, 0
+    color_type, compression_method, filter_method, interlace_method = 6, 0, 0, 0
     expected_calls = [
         ('Ширина: 512 пикселей',),
         ('Высота: 256 пикселей',),
         ('Глубина цвета: 8',),
         ('Тип цвета: RGBA',),
         ('Метод сжатия: 0',),
-        ('Метод интерлейса: 0',),
+        ('Метод фильтрации: 0',),
+        ('Метод интерлейса: 0',)
     ]
     with patch('builtins.print') as mock_print:
-        print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, interlace_method)
+        print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, filter_method, interlace_method)
         actual_calls = [call.args for call in mock_print.call_args_list]
         assert actual_calls == expected_calls
 

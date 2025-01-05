@@ -37,7 +37,7 @@ def test_image_characteristics(test_image):
     assert ihdr_chunk is not None
 
     ihdr = ihdr_chunk['Data']
-    width, height, bit_depth, color_type, _, _ = decode_ihdr(ihdr)
+    width, height, bit_depth, color_type, _, _, _ = decode_ihdr(ihdr)
 
     assert width == test_image['expected_width']
     assert height == test_image['expected_height']
