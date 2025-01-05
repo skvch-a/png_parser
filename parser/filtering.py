@@ -57,6 +57,9 @@ def apply_filtering(data: bytes, width: int, height: int, color_type: int) -> by
                 upper_left = prev_row[i - bytes_per_pixel] if i >= bytes_per_pixel else 0
                 row_data[i] = (row_data[i] + paeth_predictor(left, above, upper_left)) % 256
 
+        elif filter_type != 0:
+            raise Exception('Некорректный фильтр')
+
         result.extend(row_data)
         prev_row = row_data
 

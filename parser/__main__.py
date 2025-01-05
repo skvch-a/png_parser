@@ -1,5 +1,6 @@
 import struct
 import os
+import zlib
 
 from . import CAN_VISUALIZE
 from .visualizer import visualize
@@ -8,26 +9,26 @@ from .filtering import apply_filtering
 from .histograms import create_histograms
 
 from typing import List, Dict, BinaryIO, Tuple
-from zlib import decompress
 from sys import argv
 
 
 def parse_file(file_path: str) -> List[Dict[str, any]]:
     """Извлекает все заголовки из PNG файла"""
     headers = []
-    try:
-        with open(file_path, 'rb') as file:
-            signature = file.read(8)
-            if signature != b'\x89PNG\r\n\x1a\n':
-                raise ValueError("Это не PNG файл")
+    with open(file_path, 'rb') as file:
+        signature = file.read(8)
+        if signature != b'\x89PNG\r\n\x1a\n':
+            raise Exception("Это не PNG файл")
 
-            while True:
+        while True:
+            try:
                 header = parse_header(file)
-                headers.append(header)
-                if header['Chunk Type'] == 'IEND':
-                    break
-    except Exception as e:
-        print(f"Ошибка при чтении файла: {e}")
+            except:
+                raise Exception('Обязательный чанк отсутствует/поврежден')
+
+            headers.append(header)
+            if header['Chunk Type'] == 'IEND':
+                break
     return headers
 
 
@@ -46,14 +47,26 @@ def parse_header(file: BinaryIO) -> Dict[str, any]:
     }
 
 
-def decode_ihdr(ihdr_chunk_data: bytes) -> Tuple[int, int, int, int, str, str]:
+def decode_ihdr(ihdr_chunk_data: bytes) -> Tuple[int, int, int, int, str, str, str]:
     """Извлекает данные из заголовка IHDR"""
-    width, height = struct.unpack('>II', ihdr_chunk_data[:8])
-    bit_depth = ihdr_chunk_data[8]
-    color_type = ihdr_chunk_data[9]
-    compression_method = 'DEFLATE' if ihdr_chunk_data[10] == 0 else 'Неизвестный'
-    interlace_method = 'Adam7' if ihdr_chunk_data[12] == 1 else 'Отсутствует'
-    return width, height, bit_depth, color_type, compression_method, interlace_method
+    try:
+        width, height = struct.unpack('>II', ihdr_chunk_data[:8])
+        bit_depth = ihdr_chunk_data[8]
+        color_type = ihdr_chunk_data[9]
+        compression_method = 'DEFLATE' if ihdr_chunk_data[10] == 0 else 'Неизвестный'
+        filter_method = 'Adaptive' if ihdr_chunk_data[11] == 0 else 'Неизвестный'
+        if ihdr_chunk_data[12] == 0:
+            interlace_method = 'Отсутствует'
+        elif ihdr_chunk_data[12] == 1:
+            interlace_method = 'Adam7'
+        else:
+            interlace_method = 'Неизвестный'
+        if 'Неизвестный' in (compression_method, filter_method, interlace_method):
+            print('ПРЕДУПРЕЖДЕНИЕ: Обнаружены неизвестные методы в IHDR. Изображение обработано методами по умолчанию')
+            print_line()
+        return width, height, bit_depth, color_type, compression_method, filter_method, interlace_method
+    except Exception:
+        raise Exception('Некорректный IHDR')
 
 
 def main():
@@ -78,8 +91,8 @@ def main():
         ihdr_chunk = next((h for h in headers if h['Chunk Type'] == 'IHDR'))
         plte_chunk = next((h for h in headers if h['Chunk Type'] == 'PLTE'), None)
         ihdr = ihdr_chunk['Data']
-        width, height, bit_depth, color_type, compression_method, interlace_method = decode_ihdr(ihdr)
-        print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, interlace_method)
+        width, height, bit_depth, color_type, compression_method, filter_method, interlace_method = decode_ihdr(ihdr)
+        print_decoded_ihdr(width, height, bit_depth, color_type, compression_method, filter_method, interlace_method)
 
         palette = None
         if plte_chunk:
@@ -89,7 +102,15 @@ def main():
 
         print_headers(headers)
         idat_data = b''.join(h['Data'] for h in headers if h['Chunk Type'] == 'IDAT')
-        decompressed_idat_data = decompress(idat_data)
+        try:
+            decompressed_idat_data = zlib.decompress(idat_data)
+        except zlib.error as exception:
+            if str(exception) == "Error -3 while decompressing data: incorrect header check":
+                message = "Некорректная контрольная сумма заголовка в IDAT"
+            else:
+                message = f"Не удалось разжать IDAT"
+            raise Exception(message)
+
         image_data = apply_filtering(decompressed_idat_data, width, height, color_type)
 
         if CAN_VISUALIZE:
@@ -103,4 +124,6 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         print_line()
-        print(f"Произошла ошибка: {e}")
+        print(f"Ошибка: {e}")
+    except KeyboardInterrupt:
+        pass
